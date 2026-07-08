@@ -8,11 +8,14 @@ def create_app():
     from werkzeug.security import generate_password_hash
     
     app = Flask(__name__)
+
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./model.db'
+    app.config["SECRET_KEY"] = "JGOIHIGHOIRJI"
+
     
     db.init_app(app) 
     datastore = SQLAlchemyUserDatastore(db , User , Role)
-    app.security = datastore
+    app.security = Security(app , datastore)
     
     app.register_blueprint(view)
     
@@ -21,16 +24,16 @@ def create_app():
         
         if not Role.query.all():
              
-            admin = app.security.create_role(name = "admin")
-            app.security.create_role(name = "user")
+            admin = app.security.datastore.create_role(name = "admin")
+            app.security.datastore.create_role(name = "user")
             db.session.flush()
             
-            user = app.security.create_user(first_name = "aman" , 
+            user = app.security.datastore.create_user(first_name = "aman" , 
                                             last_name = "kumar" , 
                                             email = "aman@example.com" , 
                                             password = generate_password_hash("aman123"))
             
-            app.security.add_role_to_user(user , admin)
+            app.security.datastore.add_role_to_user(user , admin)
             
             db.session.commit()
         
