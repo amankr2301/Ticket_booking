@@ -2,7 +2,7 @@ from flask import Flask
 from flask_security import SQLAlchemyUserDatastore , Security
 
 
-def create_app():
+def create_app():  # sourcery skip: extract-method
     from application.views import view
     from application.models import db , User , Role , UserRoles
     from werkzeug.security import generate_password_hash

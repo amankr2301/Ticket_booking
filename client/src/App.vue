@@ -1,13 +1,14 @@
 <script setup>
 
 import "bootstrap/dist/css/bootstrap.min.css"
+import store from "@/store";
 
 </script>
 
 <template>
   
 <div>
-    <h1>Hello, world!</h1>
+    <h1>{{ store.state.message }}</h1>
 
   </div>
 </template>
