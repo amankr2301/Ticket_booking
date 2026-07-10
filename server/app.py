@@ -1,5 +1,7 @@
 from flask import Flask 
 from flask_security import SQLAlchemyUserDatastore , Security
+from flask_cors import CORS 
+ 
 
 
 def create_app():  # sourcery skip: extract-method
@@ -15,9 +17,11 @@ def create_app():  # sourcery skip: extract-method
     
     db.init_app(app) 
     datastore = SQLAlchemyUserDatastore(db , User , Role)
-    app.security = Security(app , datastore)
+    app.security = Security(app , datastore , register_blueprint = False)
     
     app.register_blueprint(view)
+
+    CORS(app, resources={r"/*": {"origins": "*"}})
     
     with app.app_context():
         db.create_all() 

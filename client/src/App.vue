@@ -12,5 +12,6 @@ import store from "@/store";
   </div>
 </template>
 
-<style>
+<style scoped>
+
 </style>
