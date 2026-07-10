@@ -6,10 +6,9 @@ import store from "@/store";
 </script>
 
 <template>
-  
-<div>
-    <h1>{{ store.state.message }}</h1>
 
+  <router-view />
+<div>
   </div>
 </template>
 
