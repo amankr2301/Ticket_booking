@@ -111,6 +111,7 @@ export default {
             event.preventDefault();
 
             if (!this.validate()) {
+                let statuscode ; 
 
                 fetch(store.getters.BASEURL + "/signin", {
                     method: "POST",
@@ -123,28 +124,25 @@ export default {
                     }),
                 })
                     .then(response => {
-                        return [response.json(), response.status];
+                        statuscode = response.status ; 
+                        return response.json()
                     })
                     .then((data) => {
 
-                        if (data[1] == 400) {
+                        if (statuscode == 404) {
 
-                            let error = data[0]["error"];
+                            let error = data["error"]
 
-                            if (error === "Invalid credentials") {
+                            if (error === "Invalid email or password") {
                                 this.error.email = "Invalid email or password";
                             }
 
                         } 
-                        else {
-                            console.log(data[0])
-                            return data[0]
-                            
+                        else if (statuscode == 200) {
+                            this.success = true;
+                            store.commit("setToken", data);                            
                         }
 
-                    }).then(data =>{
-                        console.log(data) ; 
-                        store.commit("setToken" , data)
                     })
 
             }
