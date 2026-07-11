@@ -7,74 +7,157 @@ import store from "@/store";
     <CommonNavBar />
 
     <div class="container-fluid section-container">
-        <div class="card">
-            <!-- @ is shortcut for v-on -->
+
+        <div class="signup-card">
+
+            <div class="alert alert-success mb-4" role="alert" v-if="success">
+                🎉 Account created successfully!
+                <button
+                    type="button"
+                    class="btn-close"
+                    @click="success = false"
+                ></button>
+            </div>
+
             <form @submit="signup">
-                <div class="card-body">
-                    <h5 class="card-title text-center">Sign Up</h5>
 
-                    <div class="row">
-                        <div class="col">
-                            <input type="text" class="form-control" placeholder="First name" aria-label="First name"
-                                v-model="firstname" />
+                <div class="text-center mb-4">
 
-                            <div class="invalid-feedback" :style="{ display: error['firstname'] ? 'block' : 'none' }">
-                                {{ error["firstname"] }}
-                            </div>
-                        </div>
-
-                        <div class="col">
-                            <input type="text" class="form-control" placeholder="Last name" aria-label="Last name"
-                                v-model="lastname" />
-                        </div>
+                    <div class="logo-circle">
+                        👤
                     </div>
+
+                    <h2>Create Account</h2>
+
+                    <p>
+                        Join us today and start your journey.
+                    </p>
+
                 </div>
 
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col">
-                            <input type="email" class="form-control" placeholder="Username" 
-                                aria-label="username" v-model="email" />
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <input
+                            type="text"
+                            class="form-control custom-input"
+                            placeholder="First Name"
+                            v-model="firstname"
+                        />
 
                         <div
-                            class="invalid-feedback" :style="{ display: error['email'] ? 'block' : 'none' }">
-                        
-                            {{ error["email"] }}
-                        </div>
-                            
-                                
+                            class="invalid-feedback"
+                            :style="{ display: error.firstname ? 'block':'none'}"
+                        >
+                            {{ error.firstname }}
                         </div>
 
-                        <div class="col">
-                            <input type="password" class="form-control" placeholder="Password" aria-label="password"
-                                v-model="password" />
-
-                            <div class="invalid-feedback" :style="{ display: error['password'] ? 'block' : 'none' }">
-                                {{ error["password"] }}
-                            </div>
-                        </div>
                     </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <input
+                            type="text"
+                            class="form-control custom-input"
+                            placeholder="Last Name"
+                            v-model="lastname"
+                        />
+
+                    </div>
+
                 </div>
 
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col">
-                            <input type="password" class="form-control" placeholder="Confirm Password"
-                                aria-label="password" v-model="confirm" />
+                <div class="mb-3">
 
-                            <div class="invalid-feedback" :style="{ display: error['confirm'] ? 'block' : 'none' }">
-                                {{ error["confirm"] }}
-                            </div>
-                        </div>
+                    <input
+                        type="email"
+                        class="form-control custom-input"
+                        placeholder="Email Address"
+                        v-model="email"
+                    />
 
-                        <div class="col">
-                            <input type="submit" class="btn btn-primary" value="Register" />
-                        </div>
+                    <div
+                        class="invalid-feedback"
+                        :style="{ display: error.email ? 'block':'none'}"
+                    >
+                        {{ error.email }}
                     </div>
+
                 </div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <input
+                            type="password"
+                            class="form-control custom-input"
+                            placeholder="Password"
+                            v-model="password"
+                        />
+
+                        <div
+                            class="invalid-feedback"
+                            :style="{ display: error.password ? 'block':'none'}"
+                        >
+                            {{ error.password }}
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+
+                        <input
+                            type="password"
+                            class="form-control custom-input"
+                            placeholder="Confirm Password"
+                            v-model="confirm"
+                        />
+
+                        <div
+                            class="invalid-feedback"
+                            :style="{ display: error.confirm ? 'block':'none'}"
+                        >
+                            {{ error.confirm }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <button
+                    class="btn btn-primary register-btn"
+                    type="submit"
+                >
+                    Create Account
+                </button>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+
+                    <small class="text-secondary">
+
+                        Already have an account?
+
+                        <router-link
+                            to="/login"
+                            class="login-link"
+                        >
+                            Login
+                        </router-link>
+
+                    </small>
+
+                </div>
+
             </form>
+
         </div>
+
     </div>
+
 </template>
 
 <script>
@@ -86,6 +169,7 @@ export default {
             password: null,
             confirm: null,
             email: null,
+            success: false, 
 
             error: {
                 firstname: null,
@@ -107,6 +191,7 @@ export default {
                 password: null,
                 confirm: null,
                 email: null,
+                
             };
 
             if (!this.firstname || this.firstname.length < 2) {
@@ -154,7 +239,25 @@ export default {
                         confirm: this.confirm
 
                     })
-                })
+                    })
+                    
+                    .then(response => {
+                        return [response.json() , response.status]; 
+
+                    }).then(data => {
+                        if (data[1] == 400){
+                            let error = data[0]["error"]
+                            if (error === "Email already exists"){
+                                this.error["email"] = "Email already in Use"
+                            }
+                        }
+                        else{
+                            this.success = true
+                        }
+                        
+                    })
+                        
+                
             }
 
             
@@ -164,18 +267,207 @@ export default {
 </script>
 
 <style scoped>
-.section-container {
-    display: flex;
-    height: 90vh;
-    justify-content: center;
-    align-items: center;
+.section-container{
+
+    min-height:90vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:40px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #111827,
+        #1e293b,
+        #0f172a
+    );
+
 }
 
-.row {
-    margin-top: 20px;
+
+.signup-card{
+
+    width:100%;
+
+    max-width:700px;
+
+    padding:45px;
+
+    border-radius:22px;
+
+    background:rgba(30,41,59,.88);
+
+    backdrop-filter:blur(16px);
+
+    box-shadow:
+    0 20px 60px rgba(0,0,0,.45);
+
 }
 
-.btn {
-    width: 100%;
+
+.logo-circle{
+
+    width:80px;
+
+    height:80px;
+
+    border-radius:50%;
+
+    margin:auto;
+
+    margin-bottom:20px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:34px;
+
+    background:#2563eb;
+
+    color:white;
+
+    box-shadow:
+    0 8px 25px rgba(37,99,235,.5);
+
+}
+
+
+h2{
+
+    color:white;
+
+    font-weight:700;
+
+}
+
+
+p{
+
+    color:#b7c2d1;
+
+}
+
+
+.custom-input{
+
+    height:52px;
+
+    border-radius:12px;
+
+    border:none;
+
+    background:#374151;
+
+    color:white;
+
+    padding-left:18px;
+
+}
+
+
+.custom-input::placeholder{
+
+    color:#cbd5e1;
+
+}
+
+
+.custom-input:focus{
+
+    background:#374151;
+
+    color:white;
+
+    border:1px solid #3b82f6;
+
+    box-shadow:
+    0 0 10px rgba(59,130,246,.45);
+
+}
+
+
+.register-btn{
+
+    width:100%;
+
+    height:52px;
+
+    border-radius:12px;
+
+    font-size:17px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+
+.register-btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+
+.invalid-feedback{
+
+    display:block;
+
+    color:#ff9d9d;
+
+    margin-top:6px;
+
+}
+
+
+.alert{
+
+    border-radius:12px;
+
+}
+
+
+hr{
+
+    border-color:#475569;
+
+}
+
+
+.login-link{
+
+    color:#60a5fa;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+}
+
+
+.login-link:hover{
+
+    color:white;
+
+}
+
+
+@media(max-width:768px){
+
+    .signup-card{
+
+        padding:30px;
+
+    }
+
 }
 </style>

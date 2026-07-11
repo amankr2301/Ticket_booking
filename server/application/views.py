@@ -1,7 +1,8 @@
 from flask import Blueprint , request
 from flask import current_app as app 
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash , check_password_hash
 from application.models import db
+from flask_security import login_user
 
 
 
@@ -25,13 +26,29 @@ def signup():
     
 
     user = app.security.datastore.create_user(first_name = firstname , last_name = lastname , email = email , 
-                           password = generate_password_hash(password))
+                            password = generate_password_hash(password))
     role = app.security.datastore.find_role("user")
     app.security.datastore.add_role_to_user(user , role)
 
     db.session.commit()
 
     return {"message" : "registration successfull"} , 201   
+
+
+@view.route("/signin" , methods = ['POST'])
+def signin():
+    email = request.json.get("email")
+    password = request.json.get("password")
+    
+    user = app.security.datastore.find_user(email = email)
+    if (not user or not check_password_hash(user.password , password)):
+        return {"error": "Invalid email or password"}, 404
+    
+    login_user(user)
+    token = user.get_auth_token()
+    return {"token" : token}, 200
+    
+    
 
     
     
