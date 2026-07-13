@@ -1,7 +1,7 @@
 from flask import Flask 
 from flask_security import SQLAlchemyUserDatastore , Security
 from flask_cors import CORS 
- 
+
 
 
 def create_app():  # sourcery skip: extract-method
@@ -27,7 +27,6 @@ def create_app():  # sourcery skip: extract-method
         db.create_all() 
         
         if not Role.query.all():
-             
             admin = app.security.datastore.create_role(name = "admin")
             app.security.datastore.create_role(name = "user")
             db.session.flush()

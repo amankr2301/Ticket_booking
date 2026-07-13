@@ -1,8 +1,8 @@
 from flask import Blueprint , request
 from flask import current_app as app 
 from werkzeug.security import generate_password_hash , check_password_hash
-from application.models import db
-from flask_security import login_user
+from application.models import db , Venue
+from flask_security import login_user,auth_required, roles_required
 
 
 
@@ -46,9 +46,87 @@ def signin():
     
     login_user(user)
     token = user.get_auth_token()
-    return {"token" : token}, 200
+    roles = [role.name for role in user.roles]
+    return {"token" : token , "roles": roles}, 200
+
+
+@view.route("/venue/create" , methods = ['POST'])
+@auth_required("token")
+@roles_required("admin")
+def create_venue():
+    name = request.json.get("name" , "")
+    place = request.json.get("place")
     
+    if not name:
+        return {"error": "Invalid name" }, 404
+    
+    if not place:
+        return {"error": "Invalid place" }, 404
+    
+    venue = Venue(name = name , place = place)
+    db.session.add(venue)
+    db.session.commit()
+    
+    return {"message": "Venue created successfully"}, 201
+
+
+@view.route('/venue/search' , methods = ['POST'])
+@auth_required("token")
+@roles_required("admin")
+def venue_search():
+    search = request.json.get("search", "").strip()
+    search.replace(" ", "")
+    option = request.json.get("option")
+    
+    
+    if (option not in ["Place" , "Name"]):
+        return {"error" : "Invalid filter"} , 400
+    
+    if(option == "Place"):
+        venues = Venue.query.filter(Venue.place.like(f"%{search}%")).all()
+    else:
+        venues = Venue.query.filter(Venue.name.like(f"%{search}%")).all()
+        
+    if (not venues):
+        return {"error" : "No match found"} , 400
+        
+    
+    
+    return [{"id" : venue.id , 
+            "name": venue.name, 
+            "place" : venue.place} for venue in venues] , 200
+
+
+@view.route("/venue/<int:id>/edit", methods=["POST"])
+@auth_required("token")
+@roles_required("admin")
+def edit_venue(id):
+
+    venue = Venue.query.get(id)
+
+    if not venue:
+        return {"error": "Venue not found"}, 404
+
+    name = request.json.get("name", "").strip()
+    place = request.json.get("place", "").strip()
+
+    if not name:
+        return {"error": "Invalid name"}, 400
+
+    if not place:
+        return {"error": "Invalid place"}, 400
+
+    venue.name = name
+    venue.place = place
+
+    db.session.commit()
     
 
-    
-    
+    return {
+        "message": "Venue updated successfully",
+        "venue": {
+            "id": venue.id,
+            "name": venue.name,
+            "place": venue.place
+        }
+    }, 200

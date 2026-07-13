@@ -1,5 +1,6 @@
 <script setup>
 import CommonNavBar from "@/components/commonnavbar.vue";
+import router from "@/router";
 import store from "@/store";
 </script>
 
@@ -9,8 +10,8 @@ import store from "@/store";
     <div class="container-fluid section-container">
         <div class="login-card">
 
-            <div class="alert alert-success mb-4" role="alert" v-if="success">
-                Logged in successfully!
+            <div class="alert alert-success alert-dismissible fade show" role="alert" v-if="success">
+                Logged in successfully 
                 <button
                     type="button"
                     @click="success = false"
@@ -124,7 +125,7 @@ export default {
                     }),
                 })
                     .then(response => {
-                        statuscode = response.status ; 
+                        statuscode = response.status; 
                         return response.json()
                     })
                     .then((data) => {
@@ -139,8 +140,18 @@ export default {
 
                         } 
                         else if (statuscode == 200) {
+
                             this.success = true;
-                            store.commit("setToken", data);                            
+                            store.commit("setToken", data);
+
+                            const roles = store.getters.getRoles;
+
+                            if (roles.includes("admin")) {
+                                router.push({ name: "admin" });
+                            } else {
+                                router.push({ name: "home" });
+                            }
+                            
                         }
 
                     })

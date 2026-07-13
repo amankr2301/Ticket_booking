@@ -7,7 +7,7 @@ import { RouterLink } from "vue-router";
         <div class="container">
 
             <RouterLink class="navbar-brand" to="/">
-                🚀 AuthSphere
+                🚀 Tickets
             </RouterLink>
 
             <button
